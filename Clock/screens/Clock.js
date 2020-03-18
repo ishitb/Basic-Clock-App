@@ -7,6 +7,8 @@ import {
   ProgressBarAndroid
 } from "react-native";
 import ProgressCircle from "react-native-progress-circle";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { weatherConditions } from "../assets/WeatherConditions"
 
 class Clock extends Component {
   constructor(props) {
@@ -18,36 +20,12 @@ class Clock extends Component {
       hours: null,
       minutes: null,
       seconds: null,
-      day: null
-    }
-  };
-
-  weekday = num => {
-    var day = "Monday";
-    switch (num) {
-      case 1:
-        day = "Monday";
-        break;
-      case 2:
-        day = "Tuesday";
-        break;
-      case 3:
-        day = "Wednesday";
-        break;
-      case 4:
-        day = "Thursday";
-        break;
-      case 5:
-        day = "Friday";
-        break;
-      case 6:
-        day = "Saturday";
-        break;
-      case 7:
-        day = "Sunday";
-        break;
-    }
-    return day
+      day: null,
+      date: null,
+      month: null
+    },
+    temp: 22.6,
+    title: "Haze"
   };
 
   _UNSAFEcomponentWillMount() {
@@ -55,10 +33,19 @@ class Clock extends Component {
   }
 
   getCurrentTime = () => {
-    let hours = new Date().getHours().toString();
-    let minutes = new Date().getMinutes().toString();
-    let seconds = new Date().getSeconds().toString();
-    let day = this.weekday(new Date().getDay());
+    let d = new Date()
+    let hours = d.getHours().toString();
+    let minutes = d.getMinutes().toString();
+    let seconds = d.getSeconds().toString();
+    let days = [
+      "Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"
+    ]
+    let day = days[ d.getDay() - 1 ];
+    let date = d.getDate()
+    let months = [
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"
+    ]
+    let month = months[ d.getMonth() - 1 ]
 
     hours = this.zeroBefore(hours);
     minutes = this.zeroBefore(minutes);
@@ -69,7 +56,9 @@ class Clock extends Component {
         hours: hours,
         minutes: minutes,
         seconds: seconds,
-        day: day
+        day: day,
+        date: date,
+        month: month
       }
     });
   };
@@ -87,6 +76,18 @@ class Clock extends Component {
     this.currentTime = setInterval(() => {
       this.getCurrentTime();
     }, 1000);
+
+    fetch("http://api.openweathermap.org/data/2.5/weather?q=Delhi&appid=7eedb3a32628b60604c0828a9b5645c5").then(res => {
+      // handle success
+      // console.log(response.data.name);
+      var response = res.json();
+      console.clear()
+      console.log(response);
+      this.setState({
+        temp: response.main.temp,
+        title: response.weather[0].main
+      });
+    })
   }
 
   render() {
@@ -99,21 +100,21 @@ class Clock extends Component {
               percent={
                 this.state.time.seconds != 0
                   ? (this.state.time.seconds / 60) * 100
-                  : 0.1
+                  : 1
               }
-              radius={155}
-              borderWidth={20}
+              radius={175}
+              borderWidth={10}
               color={Colors.accentOne}
               shadowColor={Colors.textColor}
               bgColor={Colors.darkBg}
             />
           </View>
-          {/* <View style={{ position: "absolute" }}>
+          <View style={{ position: "absolute" }}>
             <ProgressCircle
               percent={
                 this.state.time.minutes != 0
                   ? (this.state.time.minutes / 60) * 100
-                  : 0.1
+                  : 1
               }
               radius={155}
               borderWidth={10}
@@ -126,8 +127,10 @@ class Clock extends Component {
             <ProgressCircle
               percent={
                 this.state.time.hours != 0
-                  ? (this.state.time.hours / 24) * 100
-                  : 0.1
+                  ? this.state.time.hours > 12
+                    ? ((this.state.time.hours - 12) / 12) * 100
+                    : (this.state.time.hours / 12) * 100
+                  : 2
               }
               radius={135}
               borderWidth={10}
@@ -135,17 +138,54 @@ class Clock extends Component {
               shadowColor={Colors.textColor}
               bgColor={Colors.darkBg}
             />
-          </View> */}
-          <Text style={styles.digital}>
-            {this.state.time.hours}:{this.state.time.minutes}:
-            {this.state.time.seconds}
-          </Text>
-          <View style={styles.break} />
-          <Text style={styles.digital}>{this.state.time.day}</Text>
+          </View>
+          <View style={{ ...styles.digital, flexDirection: "row", justifyContent: "space-evenly", width: 230, backgroundColor: Colors.darkBg }}>
+            <View style={styles.weather}>
+              <View style={{ marginRight: 10 }}>
+                <MaterialCommunityIcons
+                  size={32}
+                  name={weatherConditions[this.state.title].icon}
+                  color={weatherConditions[this.state.title].color}
+                />
+              </View>
+              <Text style={styles.weatherText}>
+              {
+                this.state.temp
+              }°C
+              </Text>
+            </View>
+            <View style={{ alignItems: "center", justifyContent: 'flex-end' }}>
+              <Text style={{ ...styles.digital, color: Colors.accentThree}}>
+                {this.state.time.hours}
+              </Text>
+              <Text style={{ ...styles.digitalText, alignSelf: "flex-end" }} >
+                { this.state.time.date }                       
+              </Text>
+            </View>
+            <View style={styles.breakVertical} />
+            <View style={{ alignItems: "center", justifyContent: 'flex-end' }}>
+              <Text style={{ ...styles.digital, color: Colors.accentTwo }}>
+                {this.state.time.minutes}
+              </Text>
+              <Text style={styles.digitalText} >
+                { this.state.time.month }
+              </Text>
+            </View>
+            <View style={styles.breakVertical} />
+            <View style={{ alignItems: "center", justifyContent: 'flex-end' }}>
+              <Text style={{ ...styles.digital, color: Colors.accentOne }}>
+                {this.state.time.seconds}
+              </Text>
+              <Text style={{ ...styles.digitalText, alignSelf: "flex-start" }} >
+                { this.state.time.day }
+              </Text>
+            </View>
+          </View>
+
         </View>
         <View style={styles.breakBottom}>
           <Text
-            style={{ ...styles.digital, textAlign: "center", fontSize: 20 }}
+            style={{ ...styles.digital, textAlign: "center", fontSize: 23 }}
           >
             Basic Clock App
           </Text>
@@ -166,7 +206,7 @@ const styles = StyleSheet.create({
     width: Dimensions.get("window").width
   },
   digital: {
-    fontSize: 35,
+    fontSize: 55,
     color: Colors.textColor,
     letterSpacing: 6,
     textTransform: "uppercase"
@@ -197,13 +237,27 @@ const styles = StyleSheet.create({
     top: 0,
     borderBottomWidth: 1
   },
-  break: {
-    width: 200,
-    height: 3,
-    backgroundColor: Colors.accentOne,
-    marginVertical: 15,
-    borderWidth: 1,
-    borderColor: Colors.textColor
+  breakVertical: {
+    width: 1,
+    height: 100,
+    backgroundColor: Colors.textColor
+  },
+  digitalText: {
+    color: Colors.textColor,
+    fontSize: 20
+  },
+  weather: {
+    alignItems: "center",
+    position: "absolute",
+    bottom: -50,
+    width: 220,
+    flexDirection: "row",
+    justifyContent: "center"
+  },
+  weatherText: {
+    color: Colors.textColor,
+    textAlign: "center",
+    fontSize: 20,
   }
 });
 
