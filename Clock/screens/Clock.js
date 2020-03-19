@@ -4,11 +4,12 @@ import {
   Text,
   View,
   Dimensions,
-  ProgressBarAndroid
+  TouchableOpacity
 } from "react-native";
 import ProgressCircle from "react-native-progress-circle";
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { weatherConditions } from "../assets/WeatherConditions"
+import { MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
+import { weatherConditions } from "../assets/WeatherConditions";
+import axios from "axios";
 
 class Clock extends Component {
   constructor(props) {
@@ -33,19 +34,28 @@ class Clock extends Component {
   }
 
   getCurrentTime = () => {
-    let d = new Date()
+    let d = new Date();
     let hours = d.getHours().toString();
     let minutes = d.getMinutes().toString();
     let seconds = d.getSeconds().toString();
-    let days = [
-      "Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"
-    ]
-    let day = days[ d.getDay() - 1 ];
-    let date = d.getDate()
+    let days = ["Mon", "Tue", "Wed", "Thurs", "Fri", "Sat", "Sun"];
+    let day = days[d.getDay() - 1];
+    let date = d.getDate();
     let months = [
-      "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"
-    ]
-    let month = months[ d.getMonth() - 1 ]
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sept",
+      "Oct",
+      "Nov",
+      "Dec"
+    ];
+    let month = months[d.getMonth() - 1];
 
     hours = this.zeroBefore(hours);
     minutes = this.zeroBefore(minutes);
@@ -77,17 +87,18 @@ class Clock extends Component {
       this.getCurrentTime();
     }, 1000);
 
-    fetch("http://api.openweathermap.org/data/2.5/weather?q=Delhi&appid=7eedb3a32628b60604c0828a9b5645c5").then(res => {
-      // handle success
-      // console.log(response.data.name);
-      var response = res.json();
-      console.clear()
-      console.log(response);
+    this.getWeather();
+  }
+
+  getWeather = () => {
+    axios(
+      "http://api.openweathermap.org/data/2.5/weather?q=Delhi&appid=7eedb3a32628b60604c0828a9b5645c5"
+    ).then(response => {
       this.setState({
-        temp: response.main.temp,
-        title: response.weather[0].main
+        temp: (response.data.main.temp - 273.15).toPrecision(4),
+        title: response.data.weather[0].main
       });
-    })
+    });
   }
 
   render() {
@@ -102,8 +113,8 @@ class Clock extends Component {
                   ? (this.state.time.seconds / 60) * 100
                   : 1
               }
-              radius={175}
-              borderWidth={10}
+              radius={170}
+              borderWidth={5}
               color={Colors.accentOne}
               shadowColor={Colors.textColor}
               bgColor={Colors.darkBg}
@@ -116,8 +127,8 @@ class Clock extends Component {
                   ? (this.state.time.minutes / 60) * 100
                   : 1
               }
-              radius={155}
-              borderWidth={10}
+              radius={150}
+              borderWidth={5}
               color={Colors.accentTwo}
               shadowColor={Colors.textColor}
               bgColor={Colors.darkBg}
@@ -132,14 +143,22 @@ class Clock extends Component {
                     : (this.state.time.hours / 12) * 100
                   : 2
               }
-              radius={135}
-              borderWidth={10}
+              radius={130}
+              borderWidth={5}
               color={Colors.accentThree}
               shadowColor={Colors.textColor}
               bgColor={Colors.darkBg}
             />
           </View>
-          <View style={{ ...styles.digital, flexDirection: "row", justifyContent: "space-evenly", width: 230, backgroundColor: Colors.darkBg }}>
+          <View
+            style={{
+              ...styles.digital,
+              flexDirection: "row",
+              justifyContent: "space-evenly",
+              width: 230,
+              backgroundColor: Colors.darkBg
+            }}
+          >
             <View style={styles.weather}>
               <View style={{ marginRight: 10 }}>
                 <MaterialCommunityIcons
@@ -148,40 +167,33 @@ class Clock extends Component {
                   color={weatherConditions[this.state.title].color}
                 />
               </View>
-              <Text style={styles.weatherText}>
-              {
-                this.state.temp
-              }°C
-              </Text>
+              <Text style={styles.weatherText}>{this.state.temp}°C</Text>
             </View>
-            <View style={{ alignItems: "center", justifyContent: 'flex-end' }}>
-              <Text style={{ ...styles.digital, color: Colors.accentThree}}>
+            <View style={{ alignItems: "center", justifyContent: "flex-end" }}>
+              <Text style={{ ...styles.digital, color: Colors.accentThree }}>
                 {this.state.time.hours}
               </Text>
-              <Text style={{ ...styles.digitalText, alignSelf: "flex-end" }} >
-                { this.state.time.date }                       
+              <Text style={{ ...styles.digitalText, alignSelf: "flex-end" }}>
+                {this.state.time.date}
               </Text>
             </View>
-            <View style={styles.breakVertical} />
-            <View style={{ alignItems: "center", justifyContent: 'flex-end' }}>
+            {/* <View style={styles.breakVertical} /> */}
+            <View style={{ alignItems: "center", justifyContent: "flex-end" }}>
               <Text style={{ ...styles.digital, color: Colors.accentTwo }}>
                 {this.state.time.minutes}
               </Text>
-              <Text style={styles.digitalText} >
-                { this.state.time.month }
-              </Text>
+              <Text style={styles.digitalText}>{this.state.time.month}</Text>
             </View>
-            <View style={styles.breakVertical} />
-            <View style={{ alignItems: "center", justifyContent: 'flex-end' }}>
+            {/* <View style={styles.breakVertical} /> */}
+            <View style={{ alignItems: "center", justifyContent: "flex-end" }}>
               <Text style={{ ...styles.digital, color: Colors.accentOne }}>
                 {this.state.time.seconds}
               </Text>
-              <Text style={{ ...styles.digitalText, alignSelf: "flex-start" }} >
-                { this.state.time.day }
+              <Text style={{ ...styles.digitalText, alignSelf: "flex-start" }}>
+                {this.state.time.day}
               </Text>
             </View>
           </View>
-
         </View>
         <View style={styles.breakBottom}>
           <Text
@@ -189,6 +201,19 @@ class Clock extends Component {
           >
             Basic Clock App
           </Text>
+          <TouchableOpacity
+            onPress={() => {
+              this.getCurrentTime()
+              this.getWeather()
+              console.log("Pressed")
+            }}
+          >
+            <AntDesign
+              size={32}
+              name="reload1"
+              color={weatherConditions[this.state.title].color}
+            />
+          </TouchableOpacity>
         </View>
       </View>
     );
@@ -209,7 +234,8 @@ const styles = StyleSheet.create({
     fontSize: 55,
     color: Colors.textColor,
     letterSpacing: 6,
-    textTransform: "uppercase"
+    textTransform: "uppercase",
+    fontFamily: "righteous"
   },
   temp: {
     borderWidth: 1,
@@ -227,7 +253,9 @@ const styles = StyleSheet.create({
     height: 100,
     bottom: 0,
     borderTopWidth: 1,
-    justifyContent: "center"
+    justifyContent: "space-evenly",
+    flexDirection: "row",
+    alignItems: "center"
   },
   breakTop: {
     position: "absolute",
@@ -257,7 +285,7 @@ const styles = StyleSheet.create({
   weatherText: {
     color: Colors.textColor,
     textAlign: "center",
-    fontSize: 20,
+    fontSize: 20
   }
 });
 
