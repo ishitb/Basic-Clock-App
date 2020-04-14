@@ -2,7 +2,6 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Colors from "./constants/Colors"
 import Clock from "./screens/Clock"
-import Trials from "./screens/Trials"
 
 export default function App() {
   return (
