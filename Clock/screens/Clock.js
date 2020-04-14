@@ -4,7 +4,7 @@ import {
   Text,
   View,
   Dimensions,
-  TouchableOpacity,
+  TouchableOpacity
 } from "react-native";
 import ProgressCircle from "react-native-progress-circle";
 import { MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
@@ -54,7 +54,7 @@ class Clock extends Component {
       "Sept",
       "Oct",
       "Nov",
-      "Dec",
+      "Dec"
     ];
     let month = months[d.getMonth() - 1];
 
@@ -163,7 +163,7 @@ class Clock extends Component {
               flexDirection: "row",
               justifyContent: "space-evenly",
               width: 230,
-              backgroundColor: Colors.darkBg,
+              backgroundColor: Colors.darkBg
             }}
           >
             <View style={styles.weather}>
@@ -210,9 +210,9 @@ class Clock extends Component {
           </Text>
           <TouchableOpacity
             onPress={() => {
-              this.getCurrentTime();
-              this.getWeather();
-              console.log("Pressed");
+              this.getCurrentTime()
+              this.getWeather()
+              console.log("Pressed")
             }}
           >
             <AntDesign
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     justifyContent: "space-evenly",
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "center"
   },
   breakTop: {
     position: "absolute",
@@ -291,8 +291,8 @@ const styles = StyleSheet.create({
   weatherText: {
     color: Colors.textColor,
     textAlign: "center",
-    fontSize: 20,
-  },
+    fontSize: 20
+  }
 });
 
 export default Clock;
